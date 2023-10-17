@@ -14,16 +14,19 @@ namespace JogoDaVelha
             string jogador1 = "Jogador 1";
             string jogador2 = "Máquina";
 
+            char[,] tabuleiro = InicializaTabuleiro();
+            char jogador = 'X';
+
             if (desafiante == "maquina")
             {
                 nivel = VerificaNivel();
                 if (nivel == "basico")
                 {
-                    CompetidorBasico();
+                    CompetidorBasico(tabuleiro, jogador1, jogador2);
                 }
                 else
                 {
-                    CompetidorExpert();
+                    CompetidorExpert(tabuleiro, jogador1, jogador2);
                 }
             }
             else
@@ -40,19 +43,17 @@ namespace JogoDaVelha
                 int valor = GerarValor();
                 MostraCabecalhoAtual(valor);
 
-                char[,] tabuleiro = InicializaTabuleiro();
-                char jogador = (valor == 1) ? 'X' : 'O';
-
                 string vencedor = null;
 
                 do
                 {
+                    ImprimeTabuleiro(tabuleiro);
+
                     Console.WriteLine($"Vez de {jogador}");
                     Console.WriteLine("Escolha uma posição para jogar, no formato '1,2', caso queira representar a primeira linha, segunda coluna!");
                     string posicao = Console.ReadLine();
                     if (VerificaPosicao(posicao, tabuleiro, jogador))
                     {
-                        ImprimeTabuleiro(tabuleiro);
                         vencedor = VerificaVencedor(tabuleiro, jogador, jogador1, jogador2);
                         if (vencedor != null)
                         {
@@ -212,14 +213,8 @@ namespace JogoDaVelha
             Console.WriteLine("---------------------------------------------------------------------");
         }
 
-        public static void CompetidorExpert()
+        public static void CompetidorBasico(char[,] tabuleiro, string jogador1, string jogador2)
         {
-            // Implemente a lógica para competidores experts aqui
-        }
-
-        public static void CompetidorBasico()
-        {
-            char[,] tabuleiro = InicializaTabuleiro();
             char jogadorHumano = 'X';
             char jogadorMaquina = 'O';
 
@@ -228,22 +223,34 @@ namespace JogoDaVelha
 
             int jogadas = 0;
 
+            ImprimeTabuleiro(tabuleiro);
+
             while (true)
             {
                 if (jogadas % 2 == 0)
                 {
-                    Console.WriteLine("Vez do jogador (X)");
+                    Console.WriteLine($"Vez de {jogador1} ({jogadorHumano})");
                     Console.WriteLine("Escolha uma posição para jogar, no formato '1,2', caso queira representar a primeira linha, segunda coluna!");
-                    string posicao = Console.ReadLine();
-                    if (VerificaPosicao(posicao, tabuleiro, jogadorHumano))
+
+                    while (true)
                     {
-                        ImprimeTabuleiro(tabuleiro);
-                        jogadorHumanoVenceu = VerificaVencedor(tabuleiro, jogadorHumano) != null;
+                        string posicao = Console.ReadLine();
+                        if (VerificaPosicao(posicao, tabuleiro, jogadorHumano))
+                        {
+                            ImprimeTabuleiro(tabuleiro);
+                            jogadorHumanoVenceu = VerificaVencedor(tabuleiro, jogadorHumano) != null;
+                            break; // Sai do loop de entrada quando uma jogada válida é feita.
+                        }
+                        else
+                        {
+                            // Jogada inválida, continue no mesmo turno.
+                            Console.WriteLine("Jogada inválida. Tente novamente.");
+                        }
                     }
                 }
                 else
                 {
-                    Console.WriteLine("Vez da máquina (O)");
+                    Console.WriteLine($"Vez de {jogador2} ({jogadorMaquina})");
                     System.Threading.Thread.Sleep(1000);
 
                     List<Tuple<int, int>> espacosLivres = new List<Tuple<int, int>>();
@@ -258,26 +265,28 @@ namespace JogoDaVelha
                         }
                     }
 
-                    Random random = new Random();
-                    int indice = random.Next(espacosLivres.Count);
-                    Tuple<int, int> escolha = espacosLivres[indice];
+                    if (espacosLivres.Count > 0)
+                    {
+                        Random random = new Random();
+                        int indice = random.Next(espacosLivres.Count);
+                        Tuple<int, int> escolha = espacosLivres[indice];
+                        int linha = escolha.Item1;
+                        int coluna = escolha.Item2;
+                        tabuleiro[linha, coluna] = jogadorMaquina;
+                    }
 
-                    int linha = escolha.Item1;
-                    int coluna = escolha.Item2;
-
-                    tabuleiro[linha, coluna] = jogadorMaquina;
                     ImprimeTabuleiro(tabuleiro);
                     jogadorMaquinaVenceu = VerificaVencedor(tabuleiro, jogadorMaquina) != null;
                 }
 
                 if (jogadorHumanoVenceu)
                 {
-                    Console.WriteLine("O jogador (X) venceu!");
+                    Console.WriteLine($"O jogador {jogador1} ({jogadorHumano}) venceu!");
                     break;
                 }
                 else if (jogadorMaquinaVenceu)
                 {
-                    Console.WriteLine("A máquina (O) venceu!");
+                    Console.WriteLine($"O jogador {jogador2} ({jogadorMaquina}) venceu!");
                     break;
                 }
 
@@ -289,6 +298,248 @@ namespace JogoDaVelha
                     break;
                 }
             }
+        }
+
+        public static void CompetidorExpert(char[,] tabuleiro, string jogador1, string jogador2)
+        {
+            char jogadorHumano = 'X';
+            char jogadorMaquina = 'O';
+
+            int jogadas = 0;
+            List<Tuple<int, int>> jogadasMaquina = new List<Tuple<int, int>>();
+
+            ImprimeTabuleiro(tabuleiro);
+
+            while (true)
+            {
+                if (jogadas % 2 == 0)
+                {
+                    Console.WriteLine($"Vez de {jogador1} ({jogadorHumano})");
+                    Console.WriteLine("Escolha uma posição para jogar, no formato '1,2', caso queira representar a primeira linha, segunda coluna!");
+
+                    while (true)
+                    {
+                        string posicao = Console.ReadLine();
+                        if (VerificaPosicao(posicao, tabuleiro, jogadorHumano))
+                        {
+                            ImprimeTabuleiro(tabuleiro);
+                            if (VerificaVencedor(tabuleiro, jogadorHumano) != null)
+                            {
+                                Console.WriteLine($"O jogador {jogador1} ({jogadorHumano}) venceu!");
+                                return;
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Jogada inválida. Tente novamente.");
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Vez da máquina ({jogador2} ({jogadorMaquina}))");
+                    System.Threading.Thread.Sleep(1000);
+
+                    Tuple<int, int> jogadaMaquina = FazerJogadaMaquina(tabuleiro, jogadorMaquina, jogadorHumano, jogadasMaquina);
+
+                    jogadasMaquina.Add(jogadaMaquina);
+
+                    ImprimeTabuleiro(tabuleiro);
+                    if (VerificaVencedor(tabuleiro, jogadorMaquina) != null)
+                    {
+                        Console.WriteLine($"A máquina {jogador2} ({jogadorMaquina}) venceu!");
+                        return;
+                    }
+                }
+
+                jogadas++;
+
+                if (jogadas == 9)
+                {
+                    Console.WriteLine("O jogo empatou!");
+                    return;
+                }
+            }
+        }
+
+        public static Tuple<int, int> FazerJogadaMaquina(char[,] tabuleiro, char jogadorMaquina, char jogadorHumano, List<Tuple<int, int>> jogadasMaquina)
+        {
+            // Verifique as condições para ganhar ou bloquear uma jogada do jogador
+            foreach (var possibilidade in PossibilidadesVitoria)
+            {
+                Tuple<int, int> jogadaVitoria = VerificaPossibilidadeVitoria(tabuleiro, jogadorMaquina, possibilidade);
+                if (jogadaVitoria != null)
+                {
+                    return jogadaVitoria;
+                }
+
+                Tuple<int, int> jogadaBloqueio = VerificaPossibilidadeVitoria(tabuleiro, jogadorHumano, possibilidade);
+                if (jogadaBloqueio != null)
+                {
+                    return jogadaBloqueio;
+                }
+            }
+
+            // Se nenhuma jogada de vitória ou bloqueio estiver disponível, faça uma jogada inteligente
+            Tuple<int, int> jogadaInteligente = EncontrarJogadaInteligente(tabuleiro, jogadorMaquina, jogadorHumano, jogadasMaquina);
+
+            if (jogadaInteligente != null)
+            {
+                return jogadaInteligente;
+            }
+
+            // Se não for possível realizar nenhuma jogada inteligente, faça uma jogada aleatória
+            Tuple<int, int> jogadaAleatoria = FazerJogadaAleatoria(tabuleiro);
+
+            return jogadaAleatoria;
+        }
+
+        public static Tuple<int, int> FazerJogadaAleatoria(char[,] tabuleiro)
+        {
+            Random random = new Random();
+            List<Tuple<int, int>> espacosLivres = new List<Tuple<int, int>>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (tabuleiro[i, j] == ' ')
+                    {
+                        espacosLivres.Add(Tuple.Create(i, j));
+                    }
+                }
+            }
+
+            if (espacosLivres.Count > 0)
+            {
+                int indice = random.Next(espacosLivres.Count);
+                return espacosLivres[indice];
+            }
+
+            return null;
+        }
+
+        public static void FazerJogadaAleatoria(char[,] tabuleiro, char jogadorMaquina)
+        {
+            Random random = new Random();
+            List<Tuple<int, int>> espacosLivres = new List<Tuple<int, int>>();
+
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (tabuleiro[i, j] == ' ')
+                    {
+                        espacosLivres.Add(Tuple.Create(i, j));
+                    }
+                }
+            }
+
+            if (espacosLivres.Count > 0)
+            {
+                int indice = random.Next(espacosLivres.Count);
+                Tuple<int, int> escolha = espacosLivres[indice];
+                int linha = escolha.Item1;
+                int coluna = escolha.Item2;
+                tabuleiro[linha, coluna] = jogadorMaquina;
+            }
+        }
+
+        public static bool FazerJogadaVencedora(char[,] tabuleiro, char jogador)
+        {
+            for (int linha = 0; linha < 3; linha++)
+            {
+                for (int coluna = 0; coluna < 3; coluna++)
+                {
+                    if (tabuleiro[linha, coluna] == ' ')
+                    {
+                        // Simula a jogada do jogador na posição atual
+                        tabuleiro[linha, coluna] = jogador;
+
+                        // Se o jogador ganhar na próxima jogada, faz a jogada da máquina e vence o jogo
+                        if (VerificaVencedor(tabuleiro, jogador) != null)
+                        {
+                            tabuleiro[linha, coluna] = jogador;
+                            return true;
+                        }
+
+                        // Desfaz a jogada para continuar as verificações
+                        tabuleiro[linha, coluna] = ' ';
+                    }
+                }
+            }
+            return false;
+        }
+        public static bool FazerJogadaInteligente(char[,] tabuleiro, char jogador, char jogadorAdversario)
+        {
+            int[] jogadaVencedora = EncontrarJogadaInteligente(tabuleiro, jogador, jogador);
+
+            if (jogadaVencedora != null)
+            {
+                tabuleiro[jogadaVencedora[0], jogadaVencedora[1]] = jogador;
+                return true;
+            }
+
+            int[] jogadaBloqueio = EncontrarJogadaInteligente(tabuleiro, jogadorAdversario, jogador);
+
+            if (jogadaBloqueio != null)
+            {
+                tabuleiro[jogadaBloqueio[0], jogadaBloqueio[1]] = jogador;
+                return true;
+            }
+
+            int[] jogadaInteligente = EncontrarJogadaInteligente(tabuleiro, jogador, jogadorAdversario);
+
+            if (jogadaInteligente != null)
+            {
+                tabuleiro[jogadaInteligente[0], jogadaInteligente[1]] = jogador;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static int[] EncontrarJogadaInteligente(char[,] tabuleiro, char jogador, char jogadorAdversario)
+        {
+            for (int linha = 0; linha < 3; linha++)
+            {
+                for (int coluna = 0; coluna < 3; coluna++)
+                {
+                    if (tabuleiro[linha, coluna] == ' ')
+                    {
+                        tabuleiro[linha, coluna] = jogador;
+
+                        if (VerificaVencedor(tabuleiro, jogador) != null)
+                        {
+                            tabuleiro[linha, coluna] = jogador;
+                            return new int[] { linha, coluna };
+                        }
+
+                        tabuleiro[linha, coluna] = ' ';
+                    }
+                }
+            }
+
+            for (int linha = 0; linha < 3; linha++)
+            {
+                for (int coluna = 0; coluna < 3; coluna++)
+                {
+                    if (tabuleiro[linha, coluna] == ' ')
+                    {
+                        tabuleiro[linha, coluna] = jogadorAdversario;
+
+                        if (VerificaVencedor(tabuleiro, jogadorAdversario) != null)
+                        {
+                            tabuleiro[linha, coluna] = jogador;
+                            return new int[] { linha, coluna };
+                        }
+                        tabuleiro[linha, coluna] = ' ';
+                    }
+                }
+            }
+
+            return null;
         }
 
         public static int GerarValor()
