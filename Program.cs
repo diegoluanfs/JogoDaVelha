@@ -8,28 +8,42 @@ namespace JogoDaVelha
         public static void Main(string[] args)
         {
             IniciarJogoDaVelha();
-            string desafiante = VerificaDesafiante();
-            string nivel = "";
 
+            string resposta = "s";
+
+            while (resposta.ToLower() == "s" || resposta.ToLower() == "sim")
+            {
+                JogarPartida();
+
+                Console.WriteLine("Deseja jogar novamente? (s/n)");
+                resposta = Console.ReadLine();
+            }
+
+            Console.WriteLine("Obrigado por jogar! Pressione qualquer tecla para sair.");
+            Console.ReadKey();
+        }
+
+        public static void JogarPartida()
+        {
+            string desafiante = VerificaDesafiante();
             string jogador1 = "Jogador 1";
             string jogador2 = "Máquina";
-
             char[,] tabuleiro = InicializaTabuleiro();
             char jogador = 'X';
 
             if (desafiante == "maquina")
             {
-                nivel = VerificaNivel();
-                if (nivel == "basico")
+                string competidor = EscolherCompetidor();
+                if (competidor == "basico")
                 {
                     CompetidorBasico(tabuleiro, jogador1, jogador2);
                 }
-                else
+                else if (competidor == "expert")
                 {
                     CompetidorExpert(tabuleiro, jogador1, jogador2);
                 }
             }
-            else
+            else if (desafiante == "player")
             {
                 Console.WriteLine("Entre com o nome do player 1:");
                 jogador1 = Console.ReadLine();
@@ -65,6 +79,26 @@ namespace JogoDaVelha
                 } while (vencedor == null);
             }
         }
+
+        public static string EscolherCompetidor()
+        {
+            string resposta;
+            bool start = false;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Escolha o nível do competidor:");
+                Console.WriteLine("1 - Competidor Básico");
+                Console.WriteLine("2 - Competidor Expert");
+                resposta = Console.ReadLine();
+                if (resposta == "1" || resposta == "2")
+                {
+                    start = true;
+                }
+            } while (!start);
+            return resposta == "1" ? "basico" : "expert";
+        }
+
 
         public static char[,] InicializaTabuleiro()
         {
@@ -339,13 +373,18 @@ namespace JogoDaVelha
                 else
                 {
                     Console.WriteLine($"Vez da máquina ({jogador2} ({jogadorMaquina}))");
-                    System.Threading.Thread.Sleep(1000);
 
+                    // Lógica para a máquina fazer a jogada
                     Tuple<int, int> jogadaMaquina = FazerJogadaMaquina(tabuleiro, jogadorMaquina, jogadorHumano, jogadasMaquina);
 
                     jogadasMaquina.Add(jogadaMaquina);
 
+                    // Exibindo a jogada da máquina no console
+                    int linha = jogadaMaquina.Item1;
+                    int coluna = jogadaMaquina.Item2;
+                    tabuleiro[linha, coluna] = jogadorMaquina;
                     ImprimeTabuleiro(tabuleiro);
+
                     if (VerificaVencedor(tabuleiro, jogadorMaquina) != null)
                     {
                         Console.WriteLine($"A máquina {jogador2} ({jogadorMaquina}) venceu!");
