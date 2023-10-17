@@ -9,21 +9,25 @@ Você pode jogar contra um oponente básico ou um oponente especializado (expert) 
 
    ```bash
    git clone https://github.com/diegoluanfs/JogoDaVelha
+   ```
 
 ### 2. Navegue até o diretório do projeto:
 
    ```bash
    cd JogoDaVelha
+   ```
 
 ### 3. Compile o projeto:
 
    ```bash
    dotnet build
+   ```
 
 ### 4. Execute o jogo
 
    ```bash
    dotnet run
+   ```
 
 Siga as instruções no console para escolher as opções de jogo e aproveite a competição!
 
@@ -47,7 +51,8 @@ Envie um pull request para este repositório original.
 ## Licença
 Este projeto é licenciado sob a MIT License - consulte o arquivo LICENSE para obter mais detalhes.
 
-Autor
-Diego Luan F. da Silva
+Autor: Diego Luan F. da Silva
+
 GitHub: https://github.com/diegoluanfs
+
 Divirta-se jogando o Jogo da Velha em C#! Sinta-se à vontade para personalizar e expandir este projeto conforme desejar.
