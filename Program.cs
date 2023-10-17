@@ -365,35 +365,51 @@ namespace JogoDaVelha
 
         public static Tuple<int, int> FazerJogadaMaquina(char[,] tabuleiro, char jogadorMaquina, char jogadorHumano, List<Tuple<int, int>> jogadasMaquina)
         {
-            // Verifique as condições para ganhar ou bloquear uma jogada do jogador
-            foreach (var possibilidade in PossibilidadesVitoria)
+            // Primeiro, verifique se a máquina pode ganhar com a próxima jogada
+            for (int linha = 0; linha < 3; linha++)
             {
-                Tuple<int, int> jogadaVitoria = VerificaPossibilidadeVitoria(tabuleiro, jogadorMaquina, possibilidade);
-                if (jogadaVitoria != null)
+                for (int coluna = 0; coluna < 3; coluna++)
                 {
-                    return jogadaVitoria;
-                }
-
-                Tuple<int, int> jogadaBloqueio = VerificaPossibilidadeVitoria(tabuleiro, jogadorHumano, possibilidade);
-                if (jogadaBloqueio != null)
-                {
-                    return jogadaBloqueio;
+                    if (tabuleiro[linha, coluna] == ' ')
+                    {
+                        tabuleiro[linha, coluna] = jogadorMaquina;
+                        if (VerificaVencedor(tabuleiro, jogadorMaquina) != null)
+                        {
+                            return Tuple.Create(linha, coluna);
+                        }
+                        tabuleiro[linha, coluna] = ' ';
+                    }
                 }
             }
 
-            // Se nenhuma jogada de vitória ou bloqueio estiver disponível, faça uma jogada inteligente
-            Tuple<int, int> jogadaInteligente = EncontrarJogadaInteligente(tabuleiro, jogadorMaquina, jogadorHumano, jogadasMaquina);
-
-            if (jogadaInteligente != null)
+            // Em seguida, verifique se o jogador humano pode ganhar com a próxima jogada e bloqueie-o
+            for (int linha = 0; linha < 3; linha++)
             {
-                return jogadaInteligente;
+                for (int coluna = 0; coluna < 3; coluna++)
+                {
+                    if (tabuleiro[linha, coluna] == ' ')
+                    {
+                        tabuleiro[linha, coluna] = jogadorHumano;
+                        if (VerificaVencedor(tabuleiro, jogadorHumano) != null)
+                        {
+                            return Tuple.Create(linha, coluna);
+                        }
+                        tabuleiro[linha, coluna] = ' ';
+                    }
+                }
             }
 
-            // Se não for possível realizar nenhuma jogada inteligente, faça uma jogada aleatória
+            // Em seguida, verifique se o centro (posição 1,1) está livre e jogue lá, se possível
+            if (tabuleiro[1, 1] == ' ')
+            {
+                return Tuple.Create(1, 1);
+            }
+
+            // Se não for possível ganhar ou bloquear, jogue em uma posição disponível aleatória
             Tuple<int, int> jogadaAleatoria = FazerJogadaAleatoria(tabuleiro);
-
             return jogadaAleatoria;
         }
+
 
         public static Tuple<int, int> FazerJogadaAleatoria(char[,] tabuleiro)
         {
